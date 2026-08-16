@@ -1,7 +1,6 @@
 import css from './NoteForm.module.css';
-import * as Yup from "yup";
 import type { NoteTag } from '../../types/note';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+
 import {
   useMutation,
   useQueryClient,
@@ -18,27 +17,6 @@ export interface NoteFormValues {
 interface NoteFormProps {
     onCancel: () => void;
 }
-
-const initialValues: NoteFormValues = {
-  title: '',
-  content: '',
-  tag: 'Todo',
-};
-
-//* for validation
-    const validationSchema = Yup.object().shape({
-  title: Yup.string()
-    .min(3, 'Title must be at least 3 characters')
-    .max(50, 'Title must be at most 50 characters')
-            .required('Title is required'),
-        
-  content: Yup.string()
-    .max(500, 'Content must be at most 500 characters'), 
-
-tag: Yup.string()
-    .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'])
-    .required('Tag is required'),
-});
 
 
 export default function NoteForm({
@@ -58,75 +36,63 @@ export default function NoteForm({
   },
 
     });
+  
+  const formAction = (formData: FormData) => {
+  const values: NoteFormValues = {
+    title: String(formData.get("title")),
+    content: String(formData.get("content")),
+    tag: formData.get("tag") as NoteTag,
+  };
+
+  createMutation.mutate(values);
+};
 
 
     return (
-        <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={(values) => {
-  createMutation.mutate(values);
-}}
-    >
-            
-  {() => (
-        <Form className={css.form}>
+      
+      <form className={css.form} action={formAction}>
           <div className={css.formGroup}>
             <label htmlFor="title">Title</label>
 
-            <Field
+            <input
               id="title"
               type="text"
-              name="title"
+            name="title"
+            required
+        minLength={3}
+        maxLength={50}
               className={css.input}
-            />
-
-            <ErrorMessage
-              name="title"
-              component="span"
-              className={css.error}
             />
           </div>
 
           <div className={css.formGroup}>
             <label htmlFor="content">Content</label>
 
-            <Field
-              as="textarea"
+            <textarea
               id="content"
               name="content"
-              rows={8}
-              className={css.textarea}
-            />
-
-            <ErrorMessage
-              name="content"
-              component="span"
-              className={css.error}
+             rows={8}
+        className={css.textarea}
+        maxLength={500}
             />
           </div>
 
           <div className={css.formGroup}>
             <label htmlFor="tag">Tag</label>
 
-            <Field
-              as="select"
+            <select
               id="tag"
-              name="tag"
-              className={css.select}
+            name="tag"
+            defaultValue="Todo"
+            className={css.select}
+            required
             >
               <option value="Todo">Todo</option>
               <option value="Work">Work</option>
               <option value="Personal">Personal</option>
               <option value="Meeting">Meeting</option>
               <option value="Shopping">Shopping</option>
-            </Field>
-
-            <ErrorMessage
-              name="tag"
-              component="span"
-              className={css.error}
-            />
+            </select>
           </div>
 
           <div className={css.actions}>
@@ -146,7 +112,5 @@ export default function NoteForm({
   Create note
 </button>
           </div>
-        </Form>
-      )}
-        </Formik>
-    )};
+        </form>
+      )};
