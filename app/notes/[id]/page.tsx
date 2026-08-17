@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
             title: `Note: ${note.title}`,
             description: note.content.slice(0, 30),
-            url: 'https://notehub.com/',
+            url: `https://notehub.com/notes/${id}`,
             images: [
                 {
                     url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
