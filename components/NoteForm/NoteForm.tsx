@@ -1,5 +1,7 @@
 import css from './NoteForm.module.css';
 import type { NoteTag } from '../../types/note';
+import { useNoteDraftStore } from '@/lib/store/noteStore';
+import { useRouter } from 'next/navigation';
 
 import {
   useMutation,
@@ -23,19 +25,25 @@ export default function NoteForm({
   onCancel,
 }: NoteFormProps) {
 
-    const queryClient = useQueryClient();
+  const router = useRouter();
+  const { draft, setDraft, clearDraft } = useNoteDraftStore();
+  const queryClient = useQueryClient();
 
     const createMutation = useMutation({
   mutationFn: createNote,
   onSuccess: () => {
-    queryClient.invalidateQueries({
-      queryKey: ['notes'],
+    clearDraft();
+
+  queryClient.invalidateQueries({
+    queryKey: ['notes'],
+  });
+
+  router.push('/notes/filter/all');
+},
+
     });
 
-    onCancel();
-  },
-
-    });
+    
   
   const formAction = (formData: FormData) => {
   const values: NoteFormValues = {
@@ -61,7 +69,9 @@ export default function NoteForm({
             required
         minLength={3}
         maxLength={50}
-              className={css.input}
+            className={css.input}
+            defaultValue={draft.title}
+  onChange={(event) => setDraft({ title: event.target.value })}
             />
           </div>
 
@@ -73,7 +83,9 @@ export default function NoteForm({
               name="content"
              rows={8}
         className={css.textarea}
-        maxLength={500}
+            maxLength={500}
+            defaultValue={draft.content}
+  onChange={(event) => setDraft({ content: event.target.value })}
             />
           </div>
 
@@ -83,9 +95,12 @@ export default function NoteForm({
             <select
               id="tag"
             name="tag"
-            defaultValue="Todo"
+            defaultValue={draft.tag}
             className={css.select}
             required
+            onChange={(event) =>
+    setDraft({ tag: event.target.value as NoteTag })
+  }
             >
               <option value="Todo">Todo</option>
               <option value="Work">Work</option>

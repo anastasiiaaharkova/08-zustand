@@ -7,6 +7,6 @@ export default function CreateNoteClient() {
   const router = useRouter();
 
   return (
-    <NoteForm onCancel={() => router.push("/notes/filter/all")} />
+    <NoteForm onCancel={() => router.back()} />
   );
 }
